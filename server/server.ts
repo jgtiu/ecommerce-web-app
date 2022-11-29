@@ -25,9 +25,10 @@ if (process.env.PROXY_KEYCLOAK_TO_LOCALHOST) {
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(mongoUrl)
 let db: Db
-let customers: Collection
+let buyers: Collection
+let sellers: Collection
+let products: Collection
 let orders: Collection
-let operators: Collection
 
 // set up Express
 const app = express()
