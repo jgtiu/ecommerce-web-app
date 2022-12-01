@@ -102,8 +102,16 @@ app.get("/api/user", (req, res) => {
   res.json(req.user || {})
 })
 
-app.get("/api/possible-ingredients", checkAuthenticated, (req, res) => {
-  res.status(200).json(possibleIngredients)
+app.get("/product/:productId", checkAuthenticated, async (req, res) => {
+  // for product detail page
+  const _id = req.params.productId
+  logger.info("/product/" + _id)
+  const product = await products.findOne({ _id })
+  if (product == null) {
+    res.status(404).json({ _id })
+    return
+  }
+  res.status(200).json(product)
 })
 
 app.get("/api/customer", checkAuthenticated, async (req, res) => {
