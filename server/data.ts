@@ -27,3 +27,11 @@ export interface Buyer {
   email: string
 }
 
+export interface Seller {
+  // For now, this is exactly the same as Buyer but we may want to be able to
+  // edit these two types independently
+  _id: string
+  username: string
+  fullName: string
+  email: string
+}
