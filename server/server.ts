@@ -115,16 +115,15 @@ app.get("/product/:productId", checkAuthenticated, async (req, res) => {
   res.status(200).json(product)
 })
 
-app.get("/api/customer", checkAuthenticated, async (req, res) => {
-  const _id = req.user.preferred_username
-  logger.info("/api/customer " + _id)
-  const customer = await customers.findOne({ _id })
-  if (customer == null) {
+app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => {
+  const _id = req.params.buyerId
+  logger.info("/buyer/" + _id)
+  const buyer = await buyers.findOne({ _id })
+  if (buyer == null) {
     res.status(404).json({ _id })
     return
   }
-  customer.orders = await orders.find({ customerId: _id, state: { $ne: "draft" } }).toArray()
-  res.status(200).json(customer)
+  res.status(200).json(buyer)
 })
 
 app.get("/api/operator", checkAuthenticated, async (req, res) => {
