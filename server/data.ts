@@ -19,3 +19,11 @@ export interface Order {
   productSellerId: string
   fulfilled: boolean
 }
+
+export interface Buyer {
+  _id: string
+  username: string
+  fullName: string
+  email: string
+}
+
