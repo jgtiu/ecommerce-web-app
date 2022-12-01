@@ -5,3 +5,8 @@ export interface DraftProduct {
   allowReturns: boolean
 }
 
+export interface Product extends DraftProduct {
+  _id: string
+  sellerId: string
+}
+
