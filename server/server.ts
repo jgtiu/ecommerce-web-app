@@ -238,9 +238,9 @@ app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
 client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
   db = client.db("test")
-  operators = db.collection('operators')
+  sellers = db.collection('sellers')
   orders = db.collection('orders')
-  customers = db.collection('customers')
+  buyers = db.collection('buyers')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/smoothie/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -257,11 +257,11 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        const operator = await operators.findOne({ _id })
-        if (operator != null) {
-          userInfo.roles = ["operator"]
+        const seller = await sellers.findOne({ _id })
+        if (seller != null) {
+          userInfo.roles = ["seller"]
         } else {
-          await customers.updateOne(
+          await buyers.updateOne(
             { _id },
             {
               $set: {
@@ -270,7 +270,7 @@ client.connect().then(() => {
             },
             { upsert: true }
           )
-          userInfo.roles = ["customer"]
+          userInfo.roles = ["buyer"]
         }
 
         return done(null, userInfo)
@@ -293,7 +293,7 @@ client.connect().then(() => {
 
     // start server
     app.listen(port, () => {
-      logger.info(`Smoothie server listening on port ${port}`)
+      logger.info(`Server listening on port ${port}`)
     })
   })
 })
