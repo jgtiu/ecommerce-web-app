@@ -25,9 +25,10 @@ if (process.env.PROXY_KEYCLOAK_TO_LOCALHOST) {
 const mongoUrl = process.env.MONGO_URL || 'mongodb://127.0.0.1:27017'
 const client = new MongoClient(mongoUrl)
 let db: Db
-let customers: Collection
+let buyers: Collection
+let sellers: Collection
+let products: Collection
 let orders: Collection
-let operators: Collection
 
 // set up Express
 const app = express()
@@ -91,28 +92,38 @@ app.post(
   }
 )
 
-app.get("/api/orders", async (req, res) => {
-  res.status(200).json(await orders.find({ state: { $ne: "draft" }}).toArray())
+app.get("/products", async (req, res) => {
+  // returns all products and product info
+  // primarily for admin page
+  res.status(200).json(await products.find().toArray())
 })
 
-app.get("/api/user", (req, res) => {
+app.get("/user", (req, res) => {
+  // user profile
   res.json(req.user || {})
 })
 
-app.get("/api/possible-ingredients", checkAuthenticated, (req, res) => {
-  res.status(200).json(possibleIngredients)
-})
-
-app.get("/api/customer", checkAuthenticated, async (req, res) => {
-  const _id = req.user.preferred_username
-  logger.info("/api/customer " + _id)
-  const customer = await customers.findOne({ _id })
-  if (customer == null) {
+app.get("/product/:productId", checkAuthenticated, async (req, res) => {
+  // for product detail page
+  const _id = req.params.productId
+  logger.info("/product/" + _id)
+  const product = await products.findOne({ _id })
+  if (product == null) {
     res.status(404).json({ _id })
     return
   }
-  customer.orders = await orders.find({ customerId: _id, state: { $ne: "draft" } }).toArray()
-  res.status(200).json(customer)
+  res.status(200).json(product)
+})
+
+app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => {
+  const _id = req.params.buyerId
+  logger.info("/buyer/" + _id)
+  const buyer = await buyers.findOne({ _id })
+  if (buyer == null) {
+    res.status(404).json({ _id })
+    return
+  }
+  res.status(200).json(buyer)
 })
 
 app.get("/api/operator", checkAuthenticated, async (req, res) => {
@@ -227,9 +238,9 @@ app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
 client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
   db = client.db("test")
-  operators = db.collection('operators')
+  sellers = db.collection('sellers')
   orders = db.collection('orders')
-  customers = db.collection('customers')
+  buyers = db.collection('buyers')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/webapp/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -246,11 +257,11 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        const operator = await operators.findOne({ _id })
-        if (operator != null) {
-          userInfo.roles = ["operator"]
+        const seller = await sellers.findOne({ _id })
+        if (seller != null) {
+          userInfo.roles = ["seller"]
         } else {
-          await customers.updateOne(
+          await buyers.updateOne(
             { _id },
             {
               $set: {
@@ -259,7 +270,7 @@ client.connect().then(() => {
             },
             { upsert: true }
           )
-          userInfo.roles = ["customer"]
+          userInfo.roles = ["buyer"]
         }
 
         return done(null, userInfo)
@@ -282,7 +293,7 @@ client.connect().then(() => {
 
     // start server
     app.listen(port, () => {
-      logger.info(`Webapp server listening on port ${port}`)
+      logger.info(`Server listening on port ${port}`)
     })
   })
 })
