@@ -16,7 +16,8 @@ export interface Order {
   productPrice: number
   productAllowReturns: boolean
   productId: string
-  productSellerId: string
+  buyerId: string
+  sellerId: string
   fulfilled: boolean
 }
 
