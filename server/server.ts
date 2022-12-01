@@ -231,7 +231,7 @@ client.connect().then(() => {
   orders = db.collection('orders')
   customers = db.collection('customers')
 
-  Issuer.discover("http://127.0.0.1:8081/auth/realms/smoothie/.well-known/openid-configuration").then(issuer => {
+  Issuer.discover("http://127.0.0.1:8081/auth/realms/webapp/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
   
     passport.use("oidc", new Strategy(
@@ -282,7 +282,7 @@ client.connect().then(() => {
 
     // start server
     app.listen(port, () => {
-      logger.info(`Smoothie server listening on port ${port}`)
+      logger.info(`Webapp server listening on port ${port}`)
     })
   })
 })
