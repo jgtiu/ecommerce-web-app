@@ -94,11 +94,12 @@ app.post(
 
 app.get("/products", async (req, res) => {
   // returns all products and product info
-  //primarily for admin page
+  // primarily for admin page
   res.status(200).json(await products.find().toArray())
 })
 
-app.get("/api/user", (req, res) => {
+app.get("/user", (req, res) => {
+  // user profile
   res.json(req.user || {})
 })
 
