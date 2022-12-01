@@ -35,3 +35,8 @@ export interface Seller {
   fullName: string
   email: string
 }
+
+export interface BuyerWithCart extends Buyer {
+  // If we implement a cart, we need this
+  cart: Product[]
+}
