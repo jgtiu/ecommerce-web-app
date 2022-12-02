@@ -98,7 +98,7 @@ app.get("/api/products", async (req, res) => {
   res.status(200).json(await products.find({ state: { $ne: "draft" } }).toArray())
 })
 
-app.get("/user", (req, res) => {
+app.get("/api/user", (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
   // user profile
   res.json(req.user || {})
 })
@@ -115,7 +115,7 @@ app.get("/product/:productId", checkAuthenticated, async (req, res) => {
   res.status(200).json(product)
 })
 
-app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => {
+app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
   const _id = req.params.buyerId
   logger.info("/buyer/" + _id)
   const buyer = await buyers.findOne({ _id })
@@ -126,7 +126,7 @@ app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => {
   res.status(200).json(buyer)
 })
 
-app.get("/api/operator", checkAuthenticated, async (req, res) => {
+app.get("/api/operator", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
   const _id = req.user.preferred_username
   const operator = await operators.findOne({ _id })
   if (operator == null) {
@@ -191,7 +191,7 @@ app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
+app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
   const order: Order = req.body
 
   // TODO: validate order object
