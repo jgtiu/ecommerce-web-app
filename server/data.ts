@@ -11,23 +11,14 @@ export interface Product extends DraftProduct {
   state: "draft" | "submitted"
 }
 
-export interface CartOrder {
-  // This is a draft version of Order
-  // We may or may not implement a cart, but either way we will use this type
-
-  // Note that CartOrder ID is different from product ID
-  // The _id field is here instead of in Order because a buyer can have more than
-  // one CartOrder at a time
-  _id: string
+export interface Order {
+  _id: string // Note that order ID is different from product ID
   productName: string
   productPrice: number
   productAllowReturns: boolean
   sellerId: string // the seller of the product
   productId: string
   buyerId: string
-}
-
-export interface Order extends CartOrder {
   // "purchased" means that the order is in the seller's queue
   // If we do not implement a cart feature, state: "cart" will never be used
   state: "cart" | "purchased" | "fulfilled"
