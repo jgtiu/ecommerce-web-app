@@ -103,10 +103,9 @@ app.get("/api/user", (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
   res.json(req.user || {})
 })
 
-app.get("/product/:productId", checkAuthenticated, async (req, res) => {
+app.get("/api/product/:productId", checkAuthenticated, async (req, res) => {
   // for product detail page
   const _id = req.params.productId
-  logger.info("/product/" + _id)
   const product = await products.findOne({ _id })
   if (product == null) {
     res.status(404).json({ _id })
