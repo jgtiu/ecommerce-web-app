@@ -137,13 +137,13 @@ app.get("/api/operator", checkAuthenticated, async (req, res) => {
   res.status(200).json(operator)
 })
 
-app.get("/api/customer/draft-order", checkAuthenticated, async (req, res) => {
-  const customerId = req.user.preferred_username
+app.get("/api/seller/:sellerId/draft-product", async (req, res) => {
+  const { sellerId } = req.params
 
   // TODO: validate customerId
 
-  const draftOrder = await orders.findOne({ state: "draft", customerId })
-  res.status(200).json(draftOrder || { customerId, ingredients: [] })
+  const draftProduct = await products.findOne({ state: "draft", sellerId })
+  res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 })
 
 app.put("/api/customer/draft-order", checkAuthenticated, async (req, res) => {
