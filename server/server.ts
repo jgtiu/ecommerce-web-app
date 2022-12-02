@@ -190,6 +190,31 @@ app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
+app.post("/api/product/:productId/buyer/:buyerId/purchase", async (req, res) => {
+  const product = await products.findOne({ _id: req.params.productId })
+  if (product == null) {
+    res.status(404).json({ _id: req.params.productId })
+    return
+  }
+  const buyer = await buyers.findOne({ _id: req.params.buyerId })
+  if (buyer == null) {
+    res.status(404).json({ _id: req.params.buyerId })
+    return
+  }
+  const result = await orders.insertOne( // If we implement cart, we need to change this to updateOne
+    {
+      productName: product.name,
+      productPrice: product.price,
+      productAllowReturns: product.allowReturns,
+      sellerId: product.sellerId,
+      productId: product._id,
+      buyerId: req.params.buyerId,
+      state: "purchased",
+    }
+  )
+  res.status(200).json({ status: "ok" })
+})
+
 app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
   const order: Order = req.body
 
