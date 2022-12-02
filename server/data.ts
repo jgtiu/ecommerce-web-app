@@ -3,11 +3,12 @@ export interface DraftProduct {
   description: string
   price: number
   allowReturns: boolean
+  sellerId: string
 }
 
 export interface Product extends DraftProduct {
   _id: string
-  sellerId: string
+  state: "draft" | "submitted"
 }
 
 export interface Order {
