@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import pino from 'pino'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
-import { DraftOrder, Order, possibleIngredients } from './data'
+import { DraftProduct, Order } from './data'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
@@ -137,28 +137,32 @@ app.get("/api/operator", checkAuthenticated, async (req, res) => {
   res.status(200).json(operator)
 })
 
-app.get("/api/customer/draft-order", checkAuthenticated, async (req, res) => {
-  const customerId = req.user.preferred_username
+app.get("/api/seller/:sellerId/draft-product", async (req, res) => {
+  const { sellerId } = req.params
 
   // TODO: validate customerId
 
-  const draftOrder = await orders.findOne({ state: "draft", customerId })
-  res.status(200).json(draftOrder || { customerId, ingredients: [] })
+  const draftProduct = await products.findOne({ state: "draft", sellerId })
+  res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 })
 
-app.put("/api/customer/draft-order", checkAuthenticated, async (req, res) => {
-  const order: DraftOrder = req.body
+app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, res) => {
+  const product: DraftProduct = req.body
 
   // TODO: validate customerId
 
-  const result = await orders.updateOne(
+  const result = await products.updateOne(
     {
-      customerId: req.user.preferred_username,
+      sellerId: req.params.sellerId,
       state: "draft",
     },
     {
       $set: {
-        ingredients: order.ingredients
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        allowReturns: product.allowReturns,
+        sellerId: req.params.sellerId
       }
     },
     {
@@ -168,20 +172,20 @@ app.put("/api/customer/draft-order", checkAuthenticated, async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/customer/submit-draft-order", checkAuthenticated, async (req, res) => {
-  const result = await orders.updateOne(
+app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
+  const result = await products.updateOne(
     {
-      customerId: req.user.preferred_username,
+      sellerId: req.params.sellerId,
       state: "draft",
     },
     {
       $set: {
-        state: "queued",
+        state: "submitted",
       }
     }
   )
   if (result.modifiedCount === 0) {
-    res.status(400).json({ error: "no draft order" })
+    res.status(400).json({ error: "no draft product" })
     return
   }
   res.status(200).json({ status: "ok" })
