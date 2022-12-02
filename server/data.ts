@@ -3,11 +3,12 @@ export interface DraftProduct {
   description: string
   price: number
   allowReturns: boolean
+  sellerId: string
 }
 
 export interface Product extends DraftProduct {
   _id: string
-  sellerId: string
+  state: "draft" | "submitted"
 }
 
 export interface Order {
@@ -15,10 +16,12 @@ export interface Order {
   productName: string
   productPrice: number
   productAllowReturns: boolean
+  sellerId: string // the seller of the product
   productId: string
   buyerId: string
-  sellerId: string
-  fulfilled: boolean
+  // "purchased" means that the order is in the seller's queue
+  // If we do not implement a cart feature, state: "cart" will never be used
+  state: "cart" | "purchased" | "fulfilled"
 }
 
 export interface Buyer {
@@ -37,7 +40,6 @@ export interface Seller {
   email: string
 }
 
-export interface BuyerWithCart extends Buyer {
-  // If we implement a cart, we need this
-  cart: Product[]
+export interface BuyerWithOrders extends Buyer {
+  orders: Order[]
 }
