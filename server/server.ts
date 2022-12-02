@@ -92,10 +92,10 @@ app.post(
   }
 )
 
-app.get("/products", async (req, res) => {
+app.get("/api/products", async (req, res) => {
   // returns all products and product info
   // primarily for admin page
-  res.status(200).json(await products.find().toArray())
+  res.status(200).json(await products.find({ state: { $ne: "draft" } }).toArray())
 })
 
 app.get("/user", (req, res) => {
