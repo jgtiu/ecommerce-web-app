@@ -49,7 +49,7 @@ export interface Seller {
   email: string
 }
 
-export interface BuyerWithCart extends Buyer {
+export interface BuyerWithOrders extends Buyer {
   // If we implement a cart, we need this
-  cart: Product[]
+  orders: Order[]
 }
