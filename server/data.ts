@@ -41,6 +41,5 @@ export interface Seller {
 }
 
 export interface BuyerWithOrders extends Buyer {
-  // If we implement a cart, we need this
   orders: Order[]
 }
