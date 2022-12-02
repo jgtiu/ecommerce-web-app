@@ -172,20 +172,20 @@ app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, r
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/customer/submit-draft-order", checkAuthenticated, async (req, res) => {
-  const result = await orders.updateOne(
+app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
+  const result = await products.updateOne(
     {
-      customerId: req.user.preferred_username,
+      sellerId: req.params.sellerId,
       state: "draft",
     },
     {
       $set: {
-        state: "queued",
+        state: "submitted",
       }
     }
   )
   if (result.modifiedCount === 0) {
-    res.status(400).json({ error: "no draft order" })
+    res.status(400).json({ error: "no draft product" })
     return
   }
   res.status(200).json({ status: "ok" })
