@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import pino from 'pino'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
-import { DraftOrder, Order, possibleIngredients } from './data'
+import { DraftProduct, Order } from './data'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
@@ -146,19 +146,23 @@ app.get("/api/seller/:sellerId/draft-product", async (req, res) => {
   res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 })
 
-app.put("/api/customer/draft-order", checkAuthenticated, async (req, res) => {
-  const order: DraftOrder = req.body
+app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, res) => {
+  const product: DraftProduct = req.body
 
   // TODO: validate customerId
 
-  const result = await orders.updateOne(
+  const result = await products.updateOne(
     {
-      customerId: req.user.preferred_username,
+      sellerId: req.params.sellerId,
       state: "draft",
     },
     {
       $set: {
-        ingredients: order.ingredients
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        allowReturns: product.allowReturns,
+        sellerId: req.params.sellerId
       }
     },
     {
