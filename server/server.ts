@@ -207,42 +207,19 @@ app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
   const order: Order = req.body
 
   // TODO: validate order object
-
-  const condition: any = {
-    _id: new ObjectId(req.params.orderId),
-    state: { 
-      $in: [
-        // because PUT is idempotent, ok to call PUT twice in a row with the existing state
-        order.state
-      ]
-    },
-  }
-  switch (order.state) {
-    case "blending":
-      condition.state.$in.push("queued")
-      // can only go to blending state if no operator assigned (or is the current user, due to idempotency)
-      condition.$or = [{ operatorId: { $exists: false }}, { operatorId: order.operatorId }]
-      break
-    case "done":
-      condition.state.$in.push("blending")
-      condition.operatorId = order.operatorId
-      break
-    default:
-      // invalid state
-      res.status(400).json({ error: "invalid state" })
-      return
-  }
   
   const result = await orders.updateOne(
-    condition,
+    {
+      _id: new ObjectId(req.params.orderId),
+      state: "purchased"
+    },
     {
       $set: {
-        state: order.state,
-        operatorId: order.operatorId,
+        state: "fulfilled"
       }
     }
   )
