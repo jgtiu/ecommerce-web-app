@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import pino from 'pino'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
-import { DraftProduct, Order } from './data'
+import { DraftProduct, Order, Product } from './data'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
@@ -171,7 +171,7 @@ app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, r
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
+app.post("/api/seller/:sellerId/submit-draft-product", async (req, res) => {
   const result = await products.updateOne(
     {
       sellerId: req.params.sellerId,
@@ -190,17 +190,9 @@ app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/product/:productId/buyer/:buyerId/purchase", async (req, res) => {
-  const product = await products.findOne({ _id: req.params.productId })
-  if (product == null) {
-    res.status(404).json({ _id: req.params.productId })
-    return
-  }
-  const buyer = await buyers.findOne({ _id: req.params.buyerId })
-  if (buyer == null) {
-    res.status(404).json({ _id: req.params.buyerId })
-    return
-  }
+app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
+  const product: Product = req.body
+
   const result = await orders.insertOne( // If we implement cart, we need to change this to updateOne
     {
       productName: product.name,
@@ -215,42 +207,20 @@ app.post("/api/product/:productId/buyer/:buyerId/purchase", async (req, res) => 
   res.status(200).json({ status: "ok" })
 })
 
-app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
+  // This route is for fulfilling orders
   const order: Order = req.body
 
   // TODO: validate order object
-
-  const condition: any = {
-    _id: new ObjectId(req.params.orderId),
-    state: { 
-      $in: [
-        // because PUT is idempotent, ok to call PUT twice in a row with the existing state
-        order.state
-      ]
-    },
-  }
-  switch (order.state) {
-    case "blending":
-      condition.state.$in.push("queued")
-      // can only go to blending state if no operator assigned (or is the current user, due to idempotency)
-      condition.$or = [{ operatorId: { $exists: false }}, { operatorId: order.operatorId }]
-      break
-    case "done":
-      condition.state.$in.push("blending")
-      condition.operatorId = order.operatorId
-      break
-    default:
-      // invalid state
-      res.status(400).json({ error: "invalid state" })
-      return
-  }
   
   const result = await orders.updateOne(
-    condition,
+    {
+      _id: new ObjectId(req.params.orderId),
+      state: "purchased"
+    },
     {
       $set: {
-        state: order.state,
-        operatorId: order.operatorId,
+        state: "fulfilled"
       }
     }
   )
