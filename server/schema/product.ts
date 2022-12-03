@@ -6,7 +6,7 @@ export const productSchema = new Schema({
     _id: String,
     name: String,
     description: String,
-    iamge: String,
+    image: String,
     category: Number
 });
 
@@ -26,3 +26,5 @@ export const productTagSchema = new Schema({
     product_id: String,
     tag_id: String
 });
+
+

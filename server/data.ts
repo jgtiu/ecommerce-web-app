@@ -1,44 +1,45 @@
-import { MongoClient, ObjectId } from 'mongodb'
-
-export interface Ingredient {
-  _id: string
+export interface DraftProduct {
   name: string
+  description: string
   price: number
+  allowReturns: boolean
+  sellerId: string
 }
 
-export interface DraftOrder {
-  customerId: string
-  ingredientIds: string[]
-}
-
-export interface Order extends DraftOrder {
+export interface Product extends DraftProduct {
   _id: string
-  state: "draft" | "queued" | "blending" | "done"
-  operatorId?: string
+  state: "draft" | "submitted"
 }
 
-export interface Customer {
+export interface Order {
+  _id: string // Note that order ID is different from product ID
+  productName: string
+  productPrice: number
+  productAllowReturns: boolean
+  sellerId: string // the seller of the product
+  productId: string
+  buyerId: string
+  // "purchased" means that the order is in the seller's queue
+  // If we do not implement a cart feature, state: "cart" will never be used
+  state: "cart" | "purchased" | "fulfilled"
+}
+
+export interface Buyer {
   _id: string
-  name: string
+  username: string
+  fullName: string
+  email: string
 }
 
-export interface CustomerWithOrders extends Customer {
+export interface Seller {
+  // For now, this is exactly the same as Buyer but we may want to be able to
+  // edit these two types independently
+  _id: string
+  username: string
+  fullName: string
+  email: string
+}
+
+export interface BuyerWithOrders extends Buyer {
   orders: Order[]
 }
-
-export interface Operator {
-  _id: string
-  name: string
-}
-
-const url = 'mongodb://localhost:27017'
-const client = new MongoClient(url)
-
-async function getPossibleIngredients() {
-    await client.connect()
-    console.log('Connected successfully to MongoDB')
-    const db = client.db("test")
-    const data = await db.collection("possibleIngredients").find().toArray()
-    return data
-}
-export const possibleIngredients = getPossibleIngredients()
