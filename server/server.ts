@@ -208,6 +208,7 @@ app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
 })
 
 app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
+  // This route is for fulfilling orders
   const order: Order = req.body
 
   // TODO: validate order object
