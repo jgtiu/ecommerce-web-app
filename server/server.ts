@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import pino from 'pino'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
-import { DraftProduct, Order } from './data'
+import { DraftProduct, Order, Product } from './data'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
@@ -190,17 +190,9 @@ app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/product/:productId/buyer/:buyerId/purchase", async (req, res) => {
-  const product = await products.findOne({ _id: req.params.productId })
-  if (product == null) {
-    res.status(404).json({ _id: req.params.productId })
-    return
-  }
-  const buyer = await buyers.findOne({ _id: req.params.buyerId })
-  if (buyer == null) {
-    res.status(404).json({ _id: req.params.buyerId })
-    return
-  }
+app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
+  const product: Product = req.body
+
   const result = await orders.insertOne( // If we implement cart, we need to change this to updateOne
     {
       productName: product.name,
