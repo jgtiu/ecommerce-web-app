@@ -171,7 +171,7 @@ app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, r
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
+app.post("/api/seller/:sellerId/submit-draft-product", async (req, res) => {
   const result = await products.updateOne(
     {
       sellerId: req.params.sellerId,
