@@ -34,10 +34,7 @@ let orders: Collection
 const app = express()
 const port = parseInt(process.env.PORT) || 8095
 app.use(bodyParser.json())
-<<<<<<< HEAD
-=======
 app.use(bodyParser.urlencoded({ extended: true }))
->>>>>>> main
 
 // set up Pino logging
 const logger = pino({
