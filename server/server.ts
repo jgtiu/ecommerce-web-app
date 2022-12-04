@@ -136,64 +136,14 @@ app.get("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
   res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 })
 
-app.get("/api/product/:productId", async (req, res) => {
-  // for product detail page
-  const _id = req.params.productId
-  const product = await products.findOne({ _id })
-  if (product == null) {
-    res.status(404).json({ _id })
-    return
-  }
-  res.status(200).json(product)
-})
-
-app.get("/api/buyer/:buyerId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
-  const _id = req.params.buyerId
-  logger.info("/buyer/" + _id)
-  const buyer = await buyers.findOne({ _id })
-  if (buyer == null) {
-    res.status(404).json({ _id })
-    return
-  }
-  res.status(200).json(buyer)
-})
-
-app.get("/api/operator", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
-  const _id = req.user.preferred_username
-  const operator = await operators.findOne({ _id })
-  if (operator == null) {
-    res.status(404).json({ _id })
-    return
-  }
-  operator.orders = await orders.find({ operatorId: _id }).toArray()
-  res.status(200).json(operator)
-})
-
-app.get("/api/seller/:sellerId/draft-product", async (req, res) => {
-  const { sellerId } = req.params
-
-  // TODO: validate customerId
-
-  const draftProduct = await products.findOne({ state: "draft", sellerId })
-  res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
-})
-
-// Alternate version using checkAuthenticated
-// app.get("/api/seller/draft-order", checkAuthenticated, async (req, res) => {
-//   const sellerId = req.user.preferred_username
-
-//   const draftProduct = await products.findOne({ state: "draft", sellerId })
-//   res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
-// })
-
-app.put("/api/seller/:sellerId/draft-product", async (req, res) => {
+app.put("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
   const product: DraftProduct = req.body
 
   // TODO: validate customerId
 
   const result = await products.updateOne(
     {
-      sellerId: req.params.sellerId,
+      sellerId: req.user.preferred_username,
       state: "draft",
     },
     {
@@ -202,7 +152,6 @@ app.put("/api/seller/:sellerId/draft-product", async (req, res) => {
         description: product.description,
         price: product.price,
         allowReturns: product.allowReturns,
-        sellerId: req.params.sellerId
       }
     },
     {
