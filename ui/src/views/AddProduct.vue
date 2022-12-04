@@ -17,6 +17,8 @@
         <!-- TODO: Remove the <strong> tag and the stuff within it -->
       </b-form-checkbox>
     </b-form>
+    <br>
+    <b-button @click="save">Save</b-button>
   </div>
 </template>
 
@@ -45,4 +47,21 @@ async function refresh() {
 }
 watch(user, refresh, { immediate: true })
 
+async function save() {
+  await fetch(
+    "/api/seller/draft-product",
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
+      body: JSON.stringify({
+        name: draftProductName.value,
+        description: draftProductDescription.value,
+        price: draftProductPrice.value,
+        allowReturns: draftProductAllowReturns.value,
+      })
+    }
+  )
+}
 </script>
