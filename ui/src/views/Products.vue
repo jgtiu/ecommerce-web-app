@@ -2,6 +2,7 @@
   <div class="mx-3 my-3">
     <h2>My Products</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
+    <b-table v-if="seller" :items="seller.productList" />
   </div>
 </template>
 
