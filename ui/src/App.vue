@@ -18,6 +18,16 @@
           My Purchase History
         </b-nav-item>
 
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller'))" href="/seller/add-product">
+          Add Product
+        </b-nav-item>
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller'))" href="/seller/products">
+          My Products
+        </b-nav-item>
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller'))" href="/seller">
+          Orders
+        </b-nav-item>
+
         <b-nav-item v-if="(user?.name && !$route.fullPath.includes('buyer'))" href="/buyer">
           My Buyer Screen
         </b-nav-item>
