@@ -6,6 +6,7 @@ import BuyerScreen from '@/views/BuyerScreen.vue'
 // seller screens
 import SellerScreen from '@/views/SellerScreen.vue'
 import AddProduct from '@/views/AddProduct.vue'
+import Products from '@/views/Products.vue'
 
 import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue"
 
@@ -42,6 +43,7 @@ const router = new VueRouter({
     },
     {
       path: "/seller/products", // under construction
+      component: Products,
     },
     {
       path: "/admin", //under construction
