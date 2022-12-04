@@ -129,9 +129,11 @@ app.get("/api/seller", checkAuthenticated, async (req, res) => {
 
 app.get("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
   const sellerId = req.user.preferred_username
-
-  // TODO: validate sellerId
-
+  const seller = await sellers.findOne({ _id: sellerId })
+  if (seller == null) {
+    res.status(404).json({ _id: sellerId })
+    return
+  }
   const draftProduct = await products.findOne({ state: "draft", sellerId })
   res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 })
@@ -139,7 +141,12 @@ app.get("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
 app.put("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
   const product: DraftProduct = req.body
 
-  // TODO: validate sellerId
+  const sellerId = req.user.preferred_username
+  const seller = await sellers.findOne({ _id: sellerId })
+  if (seller == null) {
+    res.status(404).json({ _id: sellerId })
+    return
+  }
 
   const result = await products.updateOne(
     {
