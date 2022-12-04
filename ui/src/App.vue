@@ -8,30 +8,30 @@
       </b-navbar-brand>
       <b-navbar-nav>
 
-        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer'))" href="/buyer">
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer') && !user?.roles?.includes('administrator'))" href="/buyer">
           Shop
         </b-nav-item>
-        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer'))" href="/buyer/cart">
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer') && !user?.roles?.includes('administrator'))" href="/buyer/cart">
           My Cart
         </b-nav-item>
-        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer'))" href="/buyer/purchase-history">
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer') && !user?.roles?.includes('administrator'))" href="/buyer/purchase-history">
           My Purchase History
         </b-nav-item>
 
-        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller'))" href="/seller/add-product">
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller') && !user?.roles?.includes('administrator'))" href="/seller/add-product">
           Add Product
         </b-nav-item>
-        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller'))" href="/seller/products">
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller') && !user?.roles?.includes('administrator'))" href="/seller/products">
           My Products
         </b-nav-item>
-        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller'))" href="/seller">
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('seller') && !user?.roles?.includes('administrator'))" href="/seller">
           Orders
         </b-nav-item>
 
-        <b-nav-item v-if="(user?.name && !$route.fullPath.includes('buyer'))" href="/buyer">
+        <b-nav-item v-if="(user?.name && !$route.fullPath.includes('buyer') && !user?.roles?.includes('administrator'))" href="/buyer">
           My Buyer Screen
         </b-nav-item>
-        <b-nav-item v-if="(user?.name && !$route.fullPath.includes('seller'))" href="/seller">
+        <b-nav-item v-if="(user?.name && !$route.fullPath.includes('seller') && !user?.roles?.includes('administrator'))" href="/seller">
           My Seller Screen
         </b-nav-item>
         <b-nav-item v-if="(user?.roles?.includes('administrator'))" href="/admin">
