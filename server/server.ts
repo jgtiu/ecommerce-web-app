@@ -180,6 +180,17 @@ app.post("/api/seller/submit-draft-product", checkAuthenticated, async (req, res
   res.status(200).json({ status: "ok" })
 })
 
+app.get("/api/product/:productId", async (req, res) => {
+  // for product detail page
+  const _id = req.params.productId
+  const product = await products.findOne({ _id, state: { $ne: "draft" } })
+  if (product == null) {
+    res.status(404).json({ _id })
+    return
+  }
+  res.status(200).json(product)
+})
+
 app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
   const product: Product = req.body
 
