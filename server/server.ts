@@ -107,7 +107,7 @@ app.get("/api/buyer", checkAuthenticated, async (req, res) => {
   const _id = req.user.preferred_username
   logger.info("/api/buyer " + _id)
   const buyer = await buyers.findOne({ _id })
-  if (buyers == null) {
+  if (buyer == null) {
     res.status(404).json({ _id })
     return
   }
