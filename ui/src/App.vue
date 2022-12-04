@@ -7,6 +7,17 @@
         <span v-else>E-commerce site</span>
       </b-navbar-brand>
       <b-navbar-nav>
+
+        <b-nav-item v-if="(user?.name && !$route.fullPath.includes('buyer'))" href="/buyer">
+          My Buyer Screen
+        </b-nav-item>
+        <b-nav-item v-if="(user?.name && !$route.fullPath.includes('seller'))" href="/seller">
+          My Seller Screen
+        </b-nav-item>
+        <b-nav-item v-if="(user?.roles?.includes('administrator'))" href="/admin">
+          My Admin Screen
+        </b-nav-item>
+
         <b-nav-item v-if="user?.name == null" href="/api/login">Login</b-nav-item>
         <b-nav-item v-if="user?.name" @click="logout">Logout</b-nav-item>
         <form method="POST" action="/api/logout" id="logoutForm" />
