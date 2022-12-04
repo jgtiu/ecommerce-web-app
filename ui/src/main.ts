@@ -42,7 +42,7 @@ const router = new VueRouter({
       component: AddProduct,
     },
     {
-      path: "/seller/products", // under construction
+      path: "/seller/products",
       component: Products,
     },
     {
