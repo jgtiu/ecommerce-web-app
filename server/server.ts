@@ -153,6 +153,7 @@ app.get("/api/seller/:sellerId/draft-product", async (req, res) => {
 //   res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 // })
 
+app.put("/api/seller/:sellerId/draft-product", async (req, res) => {
   const product: DraftProduct = req.body
 
   // TODO: validate customerId
