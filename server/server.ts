@@ -29,6 +29,7 @@ let buyers: Collection
 let sellers: Collection
 let products: Collection
 let orders: Collection
+let administrators: Collection
 
 // set up Express
 const app = express()
@@ -266,6 +267,7 @@ client.connect().then(() => {
   sellers = db.collection('sellers')
   orders = db.collection('orders')
   products = db.collection('products')
+  administrators = db.collection('administrators')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/webapp/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -282,9 +284,9 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        const seller = await sellers.findOne({ _id })
-        if (seller != null) {
-          userInfo.roles = ["seller"]
+        const administrator = await administrators.findOne({ _id })
+        if (administrator != null) {
+          userInfo.roles = ["administrator"]
         } else {
           await buyers.updateOne(
             { _id },
