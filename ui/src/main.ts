@@ -2,7 +2,10 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from '@/App.vue'
 import BuyerScreen from '@/views/BuyerScreen.vue'
+
+// seller screens
 import SellerScreen from '@/views/SellerScreen.vue'
+import AddProduct from '@/views/AddProduct.vue'
 
 import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue"
 
@@ -34,7 +37,8 @@ const router = new VueRouter({
       component: SellerScreen,
     },
     {
-      path: "/seller/add-product", //under construction
+      path: "/seller/add-product",
+      component: AddProduct,
     },
     {
       path: "/seller/products", // under construction
