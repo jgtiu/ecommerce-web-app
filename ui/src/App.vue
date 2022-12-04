@@ -8,6 +8,16 @@
       </b-navbar-brand>
       <b-navbar-nav>
 
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer'))" href="/buyer">
+          Shop
+        </b-nav-item>
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer'))" href="/buyer/cart">
+          My Cart
+        </b-nav-item>
+        <b-nav-item v-if="(user?.name && $route.fullPath.includes('buyer'))" href="/buyer/purchase-history">
+          My Purchase History
+        </b-nav-item>
+
         <b-nav-item v-if="(user?.name && !$route.fullPath.includes('buyer'))" href="/buyer">
           My Buyer Screen
         </b-nav-item>
