@@ -43,3 +43,7 @@ export interface Seller {
 export interface BuyerWithOrders extends Buyer {
   orders: Order[]
 }
+
+export interface SellerWithOrdersToFulfill extends Seller {
+  orders: Order[]
+}
