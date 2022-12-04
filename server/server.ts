@@ -219,12 +219,8 @@ app.post("/api/product/:productId/purchase", checkAuthenticated, async (req, res
   res.status(200).json({ status: "ok" })
 })
 
-app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
+app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
   // This route is for fulfilling orders
-  const order: Order = req.body
-
-  // TODO: validate order object
-  
   const result = await orders.updateOne(
     {
       _id: new ObjectId(req.params.orderId),
@@ -238,7 +234,7 @@ app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
   )
 
   if (result.matchedCount === 0) {
-    res.status(400).json({ error: "orderId does not exist or state change not allowed" })
+    res.status(400).json({ error: "Order ID does not exist" })
     return
   }
   res.status(200).json({ status: "ok" })
