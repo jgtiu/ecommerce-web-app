@@ -111,7 +111,7 @@ app.get("/api/buyer", checkAuthenticated, async (req, res) => {
     res.status(404).json({ _id })
     return
   }
-  buyer.orders = await orders.find({ buyerId: _id, state: { $ne: "draft" } }).toArray()
+  buyer.orders = await orders.find({ buyerId: _id, state: { $ne: "cart" } }).toArray()
   res.status(200).json(buyer)
 })
 
@@ -123,7 +123,7 @@ app.get("/api/seller", checkAuthenticated, async (req, res) => {
     res.status(404).json({ _id })
     return
   }
-  seller.orders = await orders.find({ sellerId: _id, state: { $ne: "draft" } }).toArray()
+  seller.orders = await orders.find({ sellerId: _id, state: { $ne: "cart" } }).toArray()
   res.status(200).json(seller)
 })
 
