@@ -98,61 +98,59 @@ app.get("/api/products", async (req, res) => {
   res.status(200).json(await products.find({ state: { $ne: "draft" } }).toArray())
 })
 
-app.get("/api/user", (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.get("/api/user", (req, res) => {
   // user profile
   res.json(req.user || {})
 })
 
-app.get("/api/product/:productId", checkAuthenticated, async (req, res) => {
-  // for product detail page
-  const _id = req.params.productId
-  const product = await products.findOne({ _id })
-  if (product == null) {
-    res.status(404).json({ _id })
-    return
-  }
-  res.status(200).json(product)
-})
-
-app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
-  const _id = req.params.buyerId
-  logger.info("/buyer/" + _id)
+app.get("/api/buyer", checkAuthenticated, async (req, res) => {
+  const _id = req.user.preferred_username
+  logger.info("/api/buyer " + _id)
   const buyer = await buyers.findOne({ _id })
   if (buyer == null) {
     res.status(404).json({ _id })
     return
   }
+  buyer.orders = await orders.find({ buyerId: _id, state: { $ne: "cart" } }).toArray()
   res.status(200).json(buyer)
 })
 
-app.get("/api/operator", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.get("/api/seller", checkAuthenticated, async (req, res) => {
   const _id = req.user.preferred_username
-  const operator = await operators.findOne({ _id })
-  if (operator == null) {
+  logger.info("/api/seller " + _id)
+  const seller = await sellers.findOne({ _id })
+  if (seller == null) {
     res.status(404).json({ _id })
     return
   }
-  operator.orders = await orders.find({ operatorId: _id }).toArray()
-  res.status(200).json(operator)
+  seller.orders = await orders.find({ sellerId: _id, state: { $ne: "cart" } }).toArray()
+  res.status(200).json(seller)
 })
 
-app.get("/api/seller/:sellerId/draft-product", async (req, res) => {
-  const { sellerId } = req.params
-
-  // TODO: validate customerId
-
+app.get("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
+  const sellerId = req.user.preferred_username
+  const seller = await sellers.findOne({ _id: sellerId })
+  if (seller == null) {
+    res.status(404).json({ _id: sellerId })
+    return
+  }
   const draftProduct = await products.findOne({ state: "draft", sellerId })
   res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 })
 
-app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, res) => {
+app.put("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
   const product: DraftProduct = req.body
 
-  // TODO: validate customerId
+  const sellerId = req.user.preferred_username
+  const seller = await sellers.findOne({ _id: sellerId })
+  if (seller == null) {
+    res.status(404).json({ _id: sellerId })
+    return
+  }
 
   const result = await products.updateOne(
     {
-      sellerId: req.params.sellerId,
+      sellerId: req.user.preferred_username,
       state: "draft",
     },
     {
@@ -161,7 +159,6 @@ app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, r
         description: product.description,
         price: product.price,
         allowReturns: product.allowReturns,
-        sellerId: req.params.sellerId
       }
     },
     {
@@ -171,10 +168,10 @@ app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, r
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/seller/:sellerId/submit-draft-product", async (req, res) => {
+app.post("/api/seller/submit-draft-product", checkAuthenticated, async (req, res) => {
   const result = await products.updateOne(
     {
-      sellerId: req.params.sellerId,
+      sellerId: req.user.preferred_username,
       state: "draft",
     },
     {
@@ -190,9 +187,24 @@ app.post("/api/seller/:sellerId/submit-draft-product", async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
-  const product: Product = req.body
+app.get("/api/product/:productId", async (req, res) => {
+  // for product detail page
+  const _id = req.params.productId
+  const product = await products.findOne({ _id, state: { $ne: "draft" } })
+  if (product == null) {
+    res.status(404).json({ _id })
+    return
+  }
+  res.status(200).json(product)
+})
 
+app.post("/api/product/:productId/purchase", checkAuthenticated, async (req, res) => {
+  const _id = req.params.productId
+  const product = await products.findOne({ _id, state: { $ne: "draft" } })
+  if (product == null) {
+    res.status(404).json({ _id })
+    return
+  }
   const result = await orders.insertOne( // If we implement cart, we need to change this to updateOne
     {
       productName: product.name,
@@ -200,19 +212,33 @@ app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
       productAllowReturns: product.allowReturns,
       sellerId: product.sellerId,
       productId: product._id,
-      buyerId: req.params.buyerId,
+      buyerId: req.user.preferred_username,
       state: "purchased",
     }
   )
   res.status(200).json({ status: "ok" })
 })
 
-app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
-  // This route is for fulfilling orders
-  const order: Order = req.body
+app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => {
+  const productUpdate: {price: number} = req.body
+  const result = await products.updateOne(
+    {
+      _id: new ObjectId(req.params.productId),
+      state: { $ne: "draft" }
+    },
+    {
+      $set: productUpdate
+    }
+  )
+  if (result.matchedCount === 0) {
+    res.status(400).json({ error: "Product ID does not exist" })
+    return
+  }
+  res.status(200).json({ status: "ok" })
+})
 
-  // TODO: validate order object
-  
+app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
+  // This route is for fulfilling orders
   const result = await orders.updateOne(
     {
       _id: new ObjectId(req.params.orderId),
@@ -226,7 +252,7 @@ app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
   )
 
   if (result.matchedCount === 0) {
-    res.status(400).json({ error: "orderId does not exist or state change not allowed" })
+    res.status(400).json({ error: "Order ID does not exist" })
     return
   }
   res.status(200).json({ status: "ok" })
@@ -236,9 +262,10 @@ app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => {
 client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
   db = client.db("test")
+  buyers = db.collection('buyers')
   sellers = db.collection('sellers')
   orders = db.collection('orders')
-  buyers = db.collection('buyers')
+  products = db.collection('products')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/webapp/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
