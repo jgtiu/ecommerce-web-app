@@ -191,9 +191,13 @@ app.get("/api/product/:productId", async (req, res) => {
   res.status(200).json(product)
 })
 
-app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
-  const product: Product = req.body
-
+app.post("/api/product/:productId/purchase", checkAuthenticated, async (req, res) => {
+  const _id = req.params.productId
+  const product = await products.findOne({ _id, state: { $ne: "draft" } })
+  if (product == null) {
+    res.status(404).json({ _id })
+    return
+  }
   const result = await orders.insertOne( // If we implement cart, we need to change this to updateOne
     {
       productName: product.name,
@@ -201,7 +205,7 @@ app.post("/api/buyer/:buyerId/purchase", async (req, res) => {
       productAllowReturns: product.allowReturns,
       sellerId: product.sellerId,
       productId: product._id,
-      buyerId: req.params.buyerId,
+      buyerId: req.user.preferred_username,
       state: "purchased",
     }
   )
