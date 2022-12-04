@@ -103,6 +103,18 @@ app.get("/api/user", (req, res) => {
   res.json(req.user || {})
 })
 
+app.get("/api/buyer", checkAuthenticated, async (req, res) => {
+  const _id = req.user.preferred_username
+  logger.info("/api/buyer " + _id)
+  const buyer = await buyers.findOne({ _id })
+  if (buyers == null) {
+    res.status(404).json({ _id })
+    return
+  }
+  buyer.orders = await orders.find({ buyerId: _id, state: { $ne: "draft" } }).toArray()
+  res.status(200).json(buyer)
+})
+
 app.get("/api/product/:productId", async (req, res) => {
   // for product detail page
   const _id = req.params.productId
