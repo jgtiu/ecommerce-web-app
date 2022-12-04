@@ -114,7 +114,7 @@ app.get("/api/product/:productId", async (req, res) => {
   res.status(200).json(product)
 })
 
-app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.get("/api/buyer/:buyerId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
   const _id = req.params.buyerId
   logger.info("/buyer/" + _id)
   const buyer = await buyers.findOne({ _id })
