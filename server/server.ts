@@ -98,7 +98,7 @@ app.get("/api/products", async (req, res) => {
   res.status(200).json(await products.find({ state: { $ne: "draft" } }).toArray())
 })
 
-app.get("/api/user", (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.get("/api/user", (req, res) => {
   // user profile
   res.json(req.user || {})
 })
