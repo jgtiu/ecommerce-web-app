@@ -4,7 +4,7 @@
     :variant="$route.fullPath.includes('admin') ? 'dark' : $route.fullPath.includes('seller') ? 'danger' : 'info'">
       <b-navbar-brand href="#">
         <span v-if="user?.name">Welcome, {{ user.name }}</span>
-        <span v-else>Smoothie Stand</span>
+        <span v-else>E-commerce site</span>
       </b-navbar-brand>
       <b-navbar-nav>
         <b-nav-item href="/">All Orders</b-nav-item>
