@@ -1,6 +1,6 @@
 <template>
   <div class="mx-3 my-3">
-    <h2>Orders</h2>
+    <h2>Shop</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
     <b-table v-if="customer" :items="customer.orders" />
     
