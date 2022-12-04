@@ -247,6 +247,7 @@ client.connect().then(() => {
   sellers = db.collection('sellers')
   orders = db.collection('orders')
   buyers = db.collection('buyers')
+  products = db.collection('products')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/webapp/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
