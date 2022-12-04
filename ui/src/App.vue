@@ -1,6 +1,7 @@
 <template>
   <div>
-    <b-navbar toggleable="lg" type="dark" :variant="user?.roles?.includes('operator') ? 'info' : 'primary'">
+    <b-navbar toggleable="lg" type="dark"
+    :variant="$route.fullPath.includes('admin') ? 'dark' : $route.fullPath.includes('seller') ? 'danger' : 'info'">
       <b-navbar-brand href="#">
         <span v-if="user?.name">Welcome, {{ user.name }}</span>
         <span v-else>Smoothie Stand</span>
