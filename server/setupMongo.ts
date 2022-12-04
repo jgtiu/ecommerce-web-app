@@ -5,6 +5,8 @@ import { Buyer, Seller } from './data'
 const url = 'mongodb://localhost:27017'
 const client = new MongoClient(url)
 
+const administrators = [{ _id: "the_admin", name: "the_admin" }]
+
 async function main() {
   await client.connect()
   console.log('Connected successfully to MongoDB')
@@ -17,7 +19,8 @@ async function main() {
     { unique: true, partialFilterExpression: { state: "draft" } }
   )
 
-  // TODO: Find how to add buyers and sellers as different user types
+  // add data
+  console.log("inserting administrators", await db.collection("administrators").insertMany(administrators as any))
 
   process.exit(0)
 }
