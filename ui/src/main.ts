@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import App from '@/App.vue'
-import CustomerScreen from '@/views/CustomerScreen.vue'
-import OperatorScreen from '@/views/OperatorScreen.vue'
-import StatusScreen from '@/views/StatusScreen.vue'
+import BuyerScreen from '@/views/BuyerScreen.vue'
+
+// seller screens
+import SellerScreen from '@/views/SellerScreen.vue'
+import AddProduct from '@/views/AddProduct.vue'
 
 import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue"
 
@@ -18,16 +20,31 @@ const router = new VueRouter({
   mode: "history",
   routes: [
     {
-      path: "/customer",
-      component: CustomerScreen,
-    },
-    {
-      path: "/operator",
-      component: OperatorScreen,
-    },
-    {
       path: "/",
-      component: StatusScreen,
+    },
+    {
+      path: "/buyer", // under construction; The BuyerScreen doubles as the shopping screen
+      component: BuyerScreen,
+    },
+    {
+      path: "/buyer/cart",
+    },
+    {
+      path: "/buyer/purchase-history",
+    },
+    {
+      path: "/seller", // under construction; The SellerScreen doubles as the "orders to fulfill" screen
+      component: SellerScreen,
+    },
+    {
+      path: "/seller/add-product",
+      component: AddProduct,
+    },
+    {
+      path: "/seller/products", // under construction
+    },
+    {
+      path: "/admin", //under construction
     }
   ],
 })

@@ -29,6 +29,7 @@ let buyers: Collection
 let sellers: Collection
 let products: Collection
 let orders: Collection
+let administrators: Collection
 
 // set up Express
 const app = express()
@@ -123,6 +124,7 @@ app.get("/api/seller", checkAuthenticated, async (req, res) => {
     res.status(404).json({ _id })
     return
   }
+  seller.productList = await products.find({ sellerId: _id, state: { $ne: "draft" } }).toArray()
   seller.orders = await orders.find({ sellerId: _id, state: { $ne: "cart" } }).toArray()
   res.status(200).json(seller)
 })
@@ -266,6 +268,7 @@ client.connect().then(() => {
   sellers = db.collection('sellers')
   orders = db.collection('orders')
   products = db.collection('products')
+  administrators = db.collection('administrators')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/webapp/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -282,20 +285,25 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        const seller = await sellers.findOne({ _id })
-        if (seller != null) {
-          userInfo.roles = ["seller"]
+        const administrator = await administrators.findOne({ _id })
+        if (administrator != null) {
+          userInfo.roles = ["administrator"]
         } else {
           await buyers.updateOne(
             { _id },
             {
-              $set: {
-                name: userInfo.name
-              }
+              $set: { name: userInfo.name }
             },
             { upsert: true }
           )
-          userInfo.roles = ["buyer"]
+          await sellers.updateOne(
+            { _id },
+            {
+              $set: { name: userInfo.name }
+            },
+            { upsert: true }
+          )
+          userInfo.roles = ["buyer", "seller"]
         }
 
         return done(null, userInfo)
