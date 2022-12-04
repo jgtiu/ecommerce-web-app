@@ -139,7 +139,7 @@ app.get("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
 app.put("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
   const product: DraftProduct = req.body
 
-  // TODO: validate customerId
+  // TODO: validate sellerId
 
   const result = await products.updateOne(
     {
