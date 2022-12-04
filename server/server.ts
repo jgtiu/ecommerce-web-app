@@ -291,13 +291,18 @@ client.connect().then(() => {
           await buyers.updateOne(
             { _id },
             {
-              $set: {
-                name: userInfo.name
-              }
+              $set: { name: userInfo.name }
             },
             { upsert: true }
           )
-          userInfo.roles = ["buyer"]
+          await sellers.updateOne(
+            { _id },
+            {
+              $set: { name: userInfo.name }
+            },
+            { upsert: true }
+          )
+          userInfo.roles = ["buyer", "seller"]
         }
 
         return done(null, userInfo)
