@@ -19,6 +19,10 @@
     </b-form>
     <br>
     <b-button @click="save">Save</b-button>
+    <br>
+    <br>
+    <b-button @click="submit">Submit</b-button>
+    Note: must save before submitting
   </div>
 </template>
 
@@ -64,4 +68,13 @@ async function save() {
     }
   )
 }
+
+async function submit() {
+  await fetch(
+    "/api/seller/submit-draft-product",
+    { method: "POST" }
+  )
+  await refresh()
+}
+
 </script>
