@@ -1,6 +1,7 @@
 <template>
   <div class="mx-3 my-3">
     <h2>My Cart</h2>
+    <b-button @click="refresh" class="mb-2">Refresh</b-button>
   </div>
 </template>
 
