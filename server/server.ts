@@ -282,7 +282,8 @@ app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
   const result = await orders.updateOne(
     {
       _id: new ObjectId(req.params.orderId),
-      state: "purchased"
+      sellerId: req.user.preferred_username,
+      state: "purchased",
     },
     {
       $set: {
