@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { watch, ref, Ref, inject } from 'vue'
-import { Operator, Order } from "../../../server/data"
+import { Order, SellerWithOtherAttributes } from "../../../server/data"
 
 const operator: Ref<Operator | null> = ref(null)
 const orders: Ref<Order[]> = ref([])
@@ -35,19 +35,10 @@ watch(user, refresh, { immediate: true })
 
 const fields = ["_id", "customerId", "state", "ingredients", "operatorId"]
 
-async function updateOrder(orderId: string, state: string) {
+async function fulfillOrder(order: Order) {
   await fetch(
-    "/api/order/" + encodeURIComponent(orderId),
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "PUT",
-      body: JSON.stringify({
-        operatorId: user.value.preferred_username,
-        state,
-      })
-    }
+    "/api/order/" + encodeURIComponent(order._id) + "/fulfill",
+    { method: "PUT" }
   )
   await refresh()
 }
