@@ -16,16 +16,20 @@
 import { watch, ref, Ref, inject } from 'vue'
 import { Order, SellerWithOtherAttributes } from "../../../server/data"
 
-const operator: Ref<Operator | null> = ref(null)
+const seller: Ref<SellerWithOtherAttributes | null> = ref(null)
 const orders: Ref<Order[]> = ref([])
 
 const user: Ref<any> = inject("user")!
 
 async function refresh() {
   if (user.value) {
-    operator.value = await (await fetch("/api/operator/")).json()
+    seller.value = await (await fetch("/api/seller")).json()
   }
-  orders.value = await (await fetch("/api/orders/")).json()
+  if (seller.value) {
+    orders.value = seller.value.orders.filter((element: Order) => {
+      return element.state === "purchased"
+    })
+  }
 }
 watch(user, refresh, { immediate: true })
 
