@@ -3,14 +3,10 @@
     <h2>Orders</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
     <b-table :items="orders" :fields="fields">
-      <template #cell(operatorId)="cellScope">
-        <span v-if="cellScope.value">
-          {{ cellScope.value }}
-          <b-button @click="updateOrder(cellScope.item._id, 'done')" v-if="cellScope.value === user?.preferred_username && cellScope.item.state !== 'done'">
-            Done
-          </b-button>
-        </span>
-        <b-button v-else @click="updateOrder(cellScope.item._id, 'blending')">Start Blending</b-button>
+      <template #cell(fulfillOrder)="cellScope">
+        <b-button @click="fulfillOrder(cellScope.item)">
+          Fulfill
+        </b-button>
       </template>
     </b-table>
   </div>
