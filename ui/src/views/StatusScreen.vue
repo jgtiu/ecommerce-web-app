@@ -1,5 +1,6 @@
 <template>
   <div class="mx-3 my-3">
+    <h2>Admin</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
     <b-table :items="orders" />
   </div>
