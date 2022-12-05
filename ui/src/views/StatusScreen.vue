@@ -7,12 +7,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, Ref } from 'vue'
+import { Product } from '../../../server/data'
 
-const orders: Ref<Order[]> = ref([])
+const products: Ref<Product[]> = ref([])
+const productBeingEdited: Ref<Product | null> = ref(null)
+const newPrice: Ref<number> = ref(0)
 
 async function refresh() {
-  orders.value = await (await fetch("/api/orders")).json()
+  products.value = await (await fetch("/api/products")).json()
+  newPrice.value = 0
 }
 onMounted(refresh)
 </script>
