@@ -37,24 +37,6 @@ async function refresh() {
 }
 watch(user, refresh, { immediate: true })
 
-async function save() {
-  await fetch(
-    "/api/customer/draft-order",
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "PUT",
-      body: JSON.stringify({ ingredients: draftOrderIngredients.value })
-    }
-  )
-}
+const fields = ["name", "description", "price", "allowReturns"]
 
-async function submit() {
-  await fetch(
-    "/api/customer/submit-draft-order",
-    { method: "POST" }
-  )
-  await refresh()
-}
 </script>
