@@ -33,7 +33,7 @@ async function refresh() {
 }
 watch(user, refresh, { immediate: true })
 
-const fields = ["_id", "customerId", "state", "ingredients", "operatorId"]
+const fields = ["productName", "productPrice", "productAllowReturns", "buyerId", "fulfillOrder"]
 
 async function fulfillOrder(order: Order) {
   await fetch(
