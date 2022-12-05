@@ -227,7 +227,7 @@ app.post("/api/product/:productId/addToCart", checkAuthenticated, async (req, re
 })
 
 app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => {
-  const productUpdate: {price: number} = req.body
+  const productUpdate: { price: number } = req.body
   const result = await products.updateOne(
     {
       _id: new ObjectId(req.params.productId),
@@ -244,12 +244,46 @@ app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => 
   res.status(200).json({ status: "ok" })
 })
 
+app.put("/api/buyer/purchase", checkAuthenticated, async (req, res) => {
+  const result = await orders.updateMany(
+    {
+      buyerId: req.user.preferred_username,
+      state: "cart"
+    },
+    {
+      $set: { state: "purchased" }
+    }
+  )
+  if (result.matchedCount === 0) {
+    res.status(400).json({ error: "Cart is empty" })
+    return
+  }
+  res.status(200).json({ status: "ok" })
+})
+
+app.get("/api/buyer/purchase-history", checkAuthenticated, async (req, res) => {
+  res.status(200).json(await orders.find({
+    buyerId: req.user.preferred_username,
+    state: { $ne: "cart" }
+  }).toArray())
+})
+
+app.delete("/api/order/:orderId/delete", checkAuthenticated, async (req, res) => {
+  const result = await orders.deleteOne(
+    {
+      _id: new ObjectId(req.params.orderId),
+      state: "cart"
+    }
+  )
+  res.status(200).json({ status: "ok" })
+})
+
 app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
-  // This route is for fulfilling orders
   const result = await orders.updateOne(
     {
       _id: new ObjectId(req.params.orderId),
-      state: "purchased"
+      sellerId: req.user.preferred_username,
+      state: "purchased",
     },
     {
       $set: {
