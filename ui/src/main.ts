@@ -24,8 +24,8 @@ const router = new VueRouter({
       path: "/",
     },
     {
-      path: "/buyer", // under construction; The BuyerScreen doubles as the shopping screen
-      component: BuyerScreen,
+      path: "/buyer",
+      component: BuyerScreen, // BuyerScreen doubles as the shopping screen
     },
     {
       path: "/buyer/cart",
