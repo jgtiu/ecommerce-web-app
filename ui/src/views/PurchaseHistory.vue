@@ -2,6 +2,7 @@
   <div class="mx-3 my-3">
     <h2>My Purchase History</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
+    <b-table :items="purchaseHistory" :fields="fields" />
   </div>
 </template>
 
@@ -24,5 +25,7 @@ async function refresh() {
   }
 }
 watch(user, refresh, { immediate: true })
+
+const fields = ["productName", "productPrice", "productAllowReturns", "state"]
 
 </script>
