@@ -2,6 +2,13 @@
   <div class="mx-3 my-3">
     <h2>My Cart</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
+    <b-table :items="cart" :fields="fields">
+      <template #cell(removeFromCart)="cellScope">
+        <b-button @click="deleteOrder(cellScope.item)">
+          Remove from Cart
+        </b-button>
+      </template>
+    </b-table>
     <b-button @click="purchase">Checkout and Purchase</b-button>
   </div>
 </template>
@@ -25,6 +32,8 @@ async function refresh() {
   }
 }
 watch(user, refresh, { immediate: true })
+
+const fields = ["productName", "productPrice", "productAllowReturns", "removeFromCart"]
 
 async function deleteOrder(order: Order) {
   await fetch(
