@@ -12,6 +12,9 @@ import SellerScreen from '@/views/SellerScreen.vue'
 import AddProduct from '@/views/AddProduct.vue'
 import Products from '@/views/Products.vue'
 
+// admin screen
+import StatusScreen from '@/views/StatusScreen.vue'
+
 import { BootstrapVue, BootstrapVueIcons } from "bootstrap-vue"
 
 import 'bootstrap/dist/css/bootstrap.css'
@@ -53,6 +56,7 @@ const router = new VueRouter({
     },
     {
       path: "/admin",
+      component: StatusScreen,
     }
   ],
 })
