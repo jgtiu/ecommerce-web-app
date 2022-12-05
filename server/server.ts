@@ -227,7 +227,7 @@ app.post("/api/product/:productId/addToCart", checkAuthenticated, async (req, re
 })
 
 app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => {
-  const productUpdate: {price: number} = req.body
+  const productUpdate: { price: number } = req.body
   const result = await products.updateOne(
     {
       _id: new ObjectId(req.params.productId),
