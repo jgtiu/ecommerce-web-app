@@ -31,4 +31,13 @@ async function deleteOrder(order: Order) {
   )
   await refresh()
 }
+
+async function purchase() {
+  await fetch(
+    "/api/buyer/purchase",
+    { method: "PUT" }
+  )
+  await refresh()
+}
+
 </script>
