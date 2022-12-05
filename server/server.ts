@@ -260,6 +260,17 @@ app.put("/api/order/:orderId/purchase", checkAuthenticated, async (req, res) => 
   }
   res.status(200).json({ status: "ok" })
 })
+
+app.delete("/api/order/:orderId/delete", checkAuthenticated, async (req, res) => {
+  const result = await orders.deleteOne(
+    {
+      _id: new ObjectId(req.params.orderId),
+      state: "cart"
+    }
+  )
+  res.status(200).json({ status: "ok" })
+})
+
 app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
   const result = await orders.updateOne(
     {
