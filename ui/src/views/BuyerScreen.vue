@@ -2,7 +2,8 @@
   <div class="mx-3 my-3">
     <h2>Shop</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
-    <b-table :items="products" :fields="fields"/>
+    <b-table :items="products" :fields="fields">
+    </b-table>
   </div>
 </template>
 
@@ -23,6 +24,6 @@ async function refresh() {
 }
 watch(user, refresh, { immediate: true })
 
-const fields = ["name", "description", "price", "allowReturns"]
+const fields = ["name", "price", "allowReturns", "addToCart"]
 
 </script>
