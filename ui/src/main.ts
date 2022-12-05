@@ -5,6 +5,7 @@ import App from '@/App.vue'
 // buyer screens
 import BuyerScreen from '@/views/BuyerScreen.vue'
 import Cart from '@/views/Cart.vue'
+import PurchaseHistory from '@/views/PurchaseHistory.vue'
 
 // seller screens
 import SellerScreen from '@/views/SellerScreen.vue'
@@ -36,6 +37,7 @@ const router = new VueRouter({
     },
     {
       path: "/buyer/purchase-history",
+      component: PurchaseHistory,
     },
     {
       path: "/seller", // under construction; The SellerScreen doubles as the "orders to fulfill" screen
