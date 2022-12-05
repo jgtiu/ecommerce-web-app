@@ -19,20 +19,17 @@
 
 <script setup lang="ts">
 import { watch, ref, inject, Ref } from 'vue'
-import { CustomerWithOrders } from "../../../server/data"
+import { Buyer, Product } from "../../../server/data"
 
-const customer: Ref<CustomerWithOrders | null> = ref(null)
+const buyer: Ref<Buyer | null>= ref(null)
+const products: Ref<Product[]> = ref([])
 const user: Ref<any> = inject("user")!
 
-const draftOrderIngredients: Ref<string[]> = ref([])
-const possibleIngredients: Ref<string[]> = ref([])
-
 async function refresh() {
-  possibleIngredients.value = await (await fetch("/api/possible-ingredients")).json()
+  products.value = await (await fetch("/api/products")).json()
 
   if (user.value) {
-    customer.value = await (await fetch("/api/customer")).json()
-    draftOrderIngredients.value = (await (await fetch("/api/customer/draft-order")).json())?.ingredients || []
+    buyer.value = await (await fetch("/api/buyer")).json()
   }
 }
 watch(user, refresh, { immediate: true })
