@@ -244,10 +244,10 @@ app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => 
   res.status(200).json({ status: "ok" })
 })
 
-app.put("/api/order/:orderId/purchase", checkAuthenticated, async (req, res) => {
-  const result = await orders.updateOne(
+app.put("/api/buyer/purchase", checkAuthenticated, async (req, res) => {
+  const result = await orders.updateMany(
     {
-      _id: new ObjectId(req.params.orderId),
+      buyerId: req.user.preferred_username,
       state: "cart"
     },
     {
@@ -255,7 +255,7 @@ app.put("/api/order/:orderId/purchase", checkAuthenticated, async (req, res) => 
     }
   )
   if (result.matchedCount === 0) {
-    res.status(400).json({ error: "Order ID does not exist" })
+    res.status(400).json({ error: "Cart is empty" })
     return
   }
   res.status(200).json({ status: "ok" })
