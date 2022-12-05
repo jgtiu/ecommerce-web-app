@@ -40,8 +40,8 @@ const router = new VueRouter({
       component: PurchaseHistory,
     },
     {
-      path: "/seller", // under construction; The SellerScreen doubles as the "orders to fulfill" screen
-      component: SellerScreen,
+      path: "/seller",
+      component: SellerScreen, // SellerScreen doubles as the "orders to fulfill" screen
     },
     {
       path: "/seller/add-product",
@@ -52,7 +52,7 @@ const router = new VueRouter({
       component: Products,
     },
     {
-      path: "/admin", //under construction
+      path: "/admin",
     }
   ],
 })
