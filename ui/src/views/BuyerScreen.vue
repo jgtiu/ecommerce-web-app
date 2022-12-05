@@ -29,7 +29,7 @@ async function refresh() {
 }
 watch(user, refresh, { immediate: true })
 
-const fields = ["name", "price", "allowReturns", "addToCart"]
+const fields = ["name", "description", "price", "allowReturns", "addToCart"]
 
 async function addToCart(product: Product) {
   await fetch(
