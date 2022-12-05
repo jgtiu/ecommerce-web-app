@@ -24,4 +24,11 @@ async function refresh() {
 }
 watch(user, refresh, { immediate: true })
 
+async function deleteOrder(order: Order) {
+  await fetch(
+    "/api/order/" + encodeURIComponent(order._id) + "/delete",
+    { method: "DELETE" }
+  )
+  await refresh()
+}
 </script>
