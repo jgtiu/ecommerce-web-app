@@ -112,7 +112,7 @@ app.get("/api/buyer", checkAuthenticated, async (req, res) => {
     res.status(404).json({ _id })
     return
   }
-  buyer.orders = await orders.find({ buyerId: _id, state: { $ne: "cart" } }).toArray()
+  buyer.orders = await orders.find({ buyerId: _id }).toArray()
   res.status(200).json(buyer)
 })
 
