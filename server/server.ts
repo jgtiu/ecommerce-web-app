@@ -261,6 +261,13 @@ app.put("/api/buyer/purchase", checkAuthenticated, async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
+app.get("/api/buyer/purchase-history", checkAuthenticated, async (req, res) => {
+  res.status(200).json(await orders.find({
+    buyerId: req.user.preferred_username,
+    state: { $ne: "cart" }
+  }).toArray())
+})
+
 app.delete("/api/order/:orderId/delete", checkAuthenticated, async (req, res) => {
   const result = await orders.deleteOne(
     {
