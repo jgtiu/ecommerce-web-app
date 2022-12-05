@@ -244,6 +244,22 @@ app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => 
   res.status(200).json({ status: "ok" })
 })
 
+app.put("/api/order/:orderId/purchase", checkAuthenticated, async (req, res) => {
+  const result = await orders.updateOne(
+    {
+      _id: new ObjectId(req.params.orderId),
+      state: "cart"
+    },
+    {
+      $set: { state: "purchased" }
+    }
+  )
+  if (result.matchedCount === 0) {
+    res.status(400).json({ error: "Order ID does not exist" })
+    return
+  }
+  res.status(200).json({ status: "ok" })
+})
 app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
   const result = await orders.updateOne(
     {
