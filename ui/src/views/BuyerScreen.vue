@@ -3,6 +3,11 @@
     <h2>Shop</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
     <b-table :items="products" :fields="fields">
+      <template #cell(addToCart)="cellScope">
+        <b-button @click="addToCart(cellScope.item)">
+          Add to Cart
+        </b-button>
+      </template>
     </b-table>
   </div>
 </template>
@@ -25,5 +30,13 @@ async function refresh() {
 watch(user, refresh, { immediate: true })
 
 const fields = ["name", "price", "allowReturns", "addToCart"]
+
+async function addToCart(product: Product) {
+  await fetch(
+    "/api/product/" + product._id + "/addToCart",
+    { method: "POST" }
+  )
+  await refresh()
+}
 
 </script>
