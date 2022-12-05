@@ -2,18 +2,7 @@
   <div class="mx-3 my-3">
     <h2>Shop</h2>
     <b-button @click="refresh" class="mb-2">Refresh</b-button>
-    <b-table v-if="customer" :items="customer.orders" />
-    
-    <h2>Draft Order</h2>
-    Check the ingredients you want:
-    <b-form-checkbox-group v-model="draftOrderIngredients" :options="possibleIngredients" />
-    <div class="mt-2">
-      <b-button @click="save">Save</b-button>
-    </div>
-    <div class="mt-2">
-      <b-button @click="submit">Submit</b-button>
-      Note: must save before submitting
-    </div>
+    <b-table :items="products" :fields="fields"/>
   </div>
 </template>
 
