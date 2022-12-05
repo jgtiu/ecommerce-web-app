@@ -245,7 +245,6 @@ app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => 
 })
 
 app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
-  // This route is for fulfilling orders
   const result = await orders.updateOne(
     {
       _id: new ObjectId(req.params.orderId),
