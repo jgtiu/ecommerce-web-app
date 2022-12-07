@@ -52,7 +52,7 @@ deploy-job:      # This job runs in the deploy stage.
     - docker compose -f compose.yaml up -d --build
 
 e2e-test-job:   # This job runs in the test stage.
-  stage: test 
+  stage: .post 
   rules:
     # The following prevents the pipeline from running except when run
     # manually via the GitLab web interface.
