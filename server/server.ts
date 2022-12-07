@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import pino from 'pino'
 import expressPinoLogger from 'express-pino-logger'
 import { Collection, Db, MongoClient, ObjectId } from 'mongodb'
-import { DraftProduct, Order } from './data'
+import { DraftProduct, Order, Product } from './data'
 import session from 'express-session'
 import MongoStore from 'connect-mongo'
 import { Issuer, Strategy } from 'openid-client'
@@ -29,6 +29,7 @@ let buyers: Collection
 let sellers: Collection
 let products: Collection
 let orders: Collection
+let administrators: Collection
 
 // set up Express
 const app = express()
@@ -98,61 +99,60 @@ app.get("/api/products", async (req, res) => {
   res.status(200).json(await products.find({ state: { $ne: "draft" } }).toArray())
 })
 
-app.get("/api/user", (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.get("/api/user", (req, res) => {
   // user profile
   res.json(req.user || {})
 })
 
-app.get("/api/product/:productId", checkAuthenticated, async (req, res) => {
-  // for product detail page
-  const _id = req.params.productId
-  const product = await products.findOne({ _id })
-  if (product == null) {
-    res.status(404).json({ _id })
-    return
-  }
-  res.status(200).json(product)
-})
-
-app.get("/buyer/:buyerId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
-  const _id = req.params.buyerId
-  logger.info("/buyer/" + _id)
+app.get("/api/buyer", checkAuthenticated, async (req, res) => {
+  const _id = req.user.preferred_username
+  logger.info("/api/buyer " + _id)
   const buyer = await buyers.findOne({ _id })
   if (buyer == null) {
     res.status(404).json({ _id })
     return
   }
+  buyer.orders = await orders.find({ buyerId: _id }).toArray()
   res.status(200).json(buyer)
 })
 
-app.get("/api/operator", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
+app.get("/api/seller", checkAuthenticated, async (req, res) => {
   const _id = req.user.preferred_username
-  const operator = await operators.findOne({ _id })
-  if (operator == null) {
+  logger.info("/api/seller " + _id)
+  const seller = await sellers.findOne({ _id })
+  if (seller == null) {
     res.status(404).json({ _id })
     return
   }
-  operator.orders = await orders.find({ operatorId: _id }).toArray()
-  res.status(200).json(operator)
+  seller.productList = await products.find({ sellerId: _id, state: { $ne: "draft" } }).toArray()
+  seller.orders = await orders.find({ sellerId: _id, state: { $ne: "cart" } }).toArray()
+  res.status(200).json(seller)
 })
 
-app.get("/api/seller/:sellerId/draft-product", async (req, res) => {
-  const { sellerId } = req.params
-
-  // TODO: validate customerId
-
+app.get("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
+  const sellerId = req.user.preferred_username
+  const seller = await sellers.findOne({ _id: sellerId })
+  if (seller == null) {
+    res.status(404).json({ _id: sellerId })
+    return
+  }
   const draftProduct = await products.findOne({ state: "draft", sellerId })
   res.status(200).json(draftProduct || { name: "", description: "", price: 0, allowReturns: false, sellerId })
 })
 
-app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, res) => {
+app.put("/api/seller/draft-product", checkAuthenticated, async (req, res) => {
   const product: DraftProduct = req.body
 
-  // TODO: validate customerId
+  const sellerId = req.user.preferred_username
+  const seller = await sellers.findOne({ _id: sellerId })
+  if (seller == null) {
+    res.status(404).json({ _id: sellerId })
+    return
+  }
 
   const result = await products.updateOne(
     {
-      sellerId: req.params.sellerId,
+      sellerId: req.user.preferred_username,
       state: "draft",
     },
     {
@@ -161,7 +161,6 @@ app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, r
         description: product.description,
         price: product.price,
         allowReturns: product.allowReturns,
-        sellerId: req.params.sellerId
       }
     },
     {
@@ -171,10 +170,10 @@ app.put("/api/seller/:sellerId/draft-product", checkAuthenticated, async (req, r
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
+app.post("/api/seller/submit-draft-product", checkAuthenticated, async (req, res) => {
   const result = await products.updateOne(
     {
-      sellerId: req.params.sellerId,
+      sellerId: req.user.preferred_username,
       state: "draft",
     },
     {
@@ -190,73 +189,111 @@ app.post("/api/seller/:sellerId/submit-draft-order", async (req, res) => {
   res.status(200).json({ status: "ok" })
 })
 
-app.post("/api/product/:productId/buyer/:buyerId/purchase", async (req, res) => {
-  const product = await products.findOne({ _id: req.params.productId })
+app.get("/api/product/:productId", async (req, res) => {
+  // for product detail page
+  const _id = req.params.productId
+  const product = await products.findOne({ _id, state: { $ne: "draft" } })
   if (product == null) {
-    res.status(404).json({ _id: req.params.productId })
+    res.status(404).json({ _id })
     return
   }
-  const buyer = await buyers.findOne({ _id: req.params.buyerId })
-  if (buyer == null) {
-    res.status(404).json({ _id: req.params.buyerId })
+  res.status(200).json(product)
+})
+
+app.post("/api/product/:productId/addToCart", checkAuthenticated, async (req, res) => {
+  const productId = req.params.productId
+  const product = await products.findOne(
+    {
+      _id: new ObjectId(productId),
+      state: { $ne: "draft" }
+    }
+  )
+  if (product == null) {
+    res.status(404).json({ productId })
     return
   }
-  const result = await orders.insertOne( // If we implement cart, we need to change this to updateOne
+  const result = await orders.insertOne(
     {
       productName: product.name,
       productPrice: product.price,
       productAllowReturns: product.allowReturns,
       sellerId: product.sellerId,
       productId: product._id,
-      buyerId: req.params.buyerId,
-      state: "purchased",
+      buyerId: req.user.preferred_username,
+      state: "cart",
     }
   )
   res.status(200).json({ status: "ok" })
 })
 
-app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => { // UNDER CONSTRUCTION: DO NOT USE
-  const order: Order = req.body
-
-  // TODO: validate order object
-
-  const condition: any = {
-    _id: new ObjectId(req.params.orderId),
-    state: { 
-      $in: [
-        // because PUT is idempotent, ok to call PUT twice in a row with the existing state
-        order.state
-      ]
+app.put("/api/product/:productId/edit", checkAuthenticated, async (req, res) => {
+  const productUpdate: { price: number } = req.body
+  const result = await products.updateOne(
+    {
+      _id: new ObjectId(req.params.productId),
+      state: { $ne: "draft" }
     },
+    {
+      $set: productUpdate
+    }
+  )
+  if (result.matchedCount === 0) {
+    res.status(400).json({ error: "Product ID does not exist" })
+    return
   }
-  switch (order.state) {
-    case "blending":
-      condition.state.$in.push("queued")
-      // can only go to blending state if no operator assigned (or is the current user, due to idempotency)
-      condition.$or = [{ operatorId: { $exists: false }}, { operatorId: order.operatorId }]
-      break
-    case "done":
-      condition.state.$in.push("blending")
-      condition.operatorId = order.operatorId
-      break
-    default:
-      // invalid state
-      res.status(400).json({ error: "invalid state" })
-      return
+  res.status(200).json({ status: "ok" })
+})
+
+app.put("/api/buyer/purchase", checkAuthenticated, async (req, res) => {
+  const result = await orders.updateMany(
+    {
+      buyerId: req.user.preferred_username,
+      state: "cart"
+    },
+    {
+      $set: { state: "purchased" }
+    }
+  )
+  if (result.matchedCount === 0) {
+    res.status(400).json({ error: "Cart is empty" })
+    return
   }
-  
+  res.status(200).json({ status: "ok" })
+})
+
+app.get("/api/buyer/purchase-history", checkAuthenticated, async (req, res) => {
+  res.status(200).json(await orders.find({
+    buyerId: req.user.preferred_username,
+    state: { $ne: "cart" }
+  }).toArray())
+})
+
+app.delete("/api/order/:orderId/delete", checkAuthenticated, async (req, res) => {
+  const result = await orders.deleteOne(
+    {
+      _id: new ObjectId(req.params.orderId),
+      state: "cart"
+    }
+  )
+  res.status(200).json({ status: "ok" })
+})
+
+app.put("/api/order/:orderId/fulfill", checkAuthenticated, async (req, res) => {
   const result = await orders.updateOne(
-    condition,
+    {
+      _id: new ObjectId(req.params.orderId),
+      sellerId: req.user.preferred_username,
+      state: "purchased",
+    },
     {
       $set: {
-        state: order.state,
-        operatorId: order.operatorId,
+        state: "fulfilled"
       }
     }
   )
 
   if (result.matchedCount === 0) {
-    res.status(400).json({ error: "orderId does not exist or state change not allowed" })
+    res.status(400).json({ error: "Order ID does not exist" })
     return
   }
   res.status(200).json({ status: "ok" })
@@ -266,9 +303,11 @@ app.put("/api/order/:orderId", checkAuthenticated, async (req, res) => { // UNDE
 client.connect().then(() => {
   logger.info('connected successfully to MongoDB')
   db = client.db("test")
+  buyers = db.collection('buyers')
   sellers = db.collection('sellers')
   orders = db.collection('orders')
-  buyers = db.collection('buyers')
+  products = db.collection('products')
+  administrators = db.collection('administrators')
 
   Issuer.discover("http://127.0.0.1:8081/auth/realms/webapp/.well-known/openid-configuration").then(issuer => {
     const client = new issuer.Client(keycloak)
@@ -285,20 +324,25 @@ client.connect().then(() => {
         logger.info("oidc " + JSON.stringify(userInfo))
 
         const _id = userInfo.preferred_username
-        const seller = await sellers.findOne({ _id })
-        if (seller != null) {
-          userInfo.roles = ["seller"]
+        const administrator = await administrators.findOne({ _id })
+        if (administrator != null) {
+          userInfo.roles = ["administrator"]
         } else {
           await buyers.updateOne(
             { _id },
             {
-              $set: {
-                name: userInfo.name
-              }
+              $set: { name: userInfo.name }
             },
             { upsert: true }
           )
-          userInfo.roles = ["buyer"]
+          await sellers.updateOne(
+            { _id },
+            {
+              $set: { name: userInfo.name }
+            },
+            { upsert: true }
+          )
+          userInfo.roles = ["buyer", "seller"]
         }
 
         return done(null, userInfo)
